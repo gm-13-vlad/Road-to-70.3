@@ -308,6 +308,13 @@ class App {
         if (canvas) this._drawMiniProfile(canvas, route);
       });
     }
+
+    // Start with the first route chosen. Without a selection the start buttons
+    // silently do nothing, which reads as the app being broken.
+    const first = container.querySelector('.route-card');
+    if (first && !this._selectedRoute && !this._selectedWorkout) {
+      this._selectRoute(routes[0], first);
+    }
   }
 
   _renderWorkoutList() {
