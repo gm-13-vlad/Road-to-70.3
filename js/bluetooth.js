@@ -22,6 +22,8 @@ export class TrainerConnection {
     this._controlAcquired = false;
     this._lastGradientSent = null;
     this._lastGradientTime = 0;
+    this._lastPowerSent = null;
+    this._lastPowerTime = 0;
     this._pendingWrite = false;
     this._features = { simulationParams: false, resistanceLevel: false };
     this._latestData = { power: 0, cadence: 0, speed: 0, heartRate: 0 };
@@ -272,6 +274,29 @@ export class TrainerConnection {
 
       this._pendingWrite = true;
       await this._controlPoint.writeValue(buf);
+    } catch {
+      this._pendingWrite = false;
+    }
+  }
+
+  async setTargetPower(watts) {
+    if (!this._controlPoint || !this._controlAcquired) return;
+    if (this._pendingWrite) return;
+
+    const target = Math.max(0, Math.round(watts));
+    const now = Date.now();
+    if (this._lastPowerSent === target && now - this._lastPowerTime < 1000) return;
+
+    try {
+      const buf = new ArrayBuffer(3);
+      const view = new DataView(buf);
+      view.setUint8(0, 0x05);
+      view.setInt16(1, target, true);
+
+      this._pendingWrite = true;
+      await this._controlPoint.writeValue(buf);
+      this._lastPowerSent = target;
+      this._lastPowerTime = now;
     } catch {
       this._pendingWrite = false;
     }

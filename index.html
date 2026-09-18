@@ -34,9 +34,22 @@
           </div>
         </div>
 
-        <div class="route-selector">
-          <h2>Select Route</h2>
+        <div class="mode-tabs">
+          <button class="tab-btn active" data-tab="routes">Routes</button>
+          <button class="tab-btn" data-tab="workouts">Workouts</button>
+          <button class="tab-btn" data-tab="history">History</button>
+        </div>
+
+        <div class="tab-panel active" id="tab-routes">
           <div id="route-list" class="route-list"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-workouts">
+          <div id="workout-list" class="route-list"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-history">
+          <div id="history-list" class="history-list"></div>
         </div>
 
         <div class="connect-actions">
@@ -76,9 +89,17 @@
             <span id="gradient-value" class="gradient-value">0%</span>
             <span class="gradient-label">GRADIENT</span>
           </div>
+          <div id="target-display" class="gradient-overlay hidden">
+            <span id="target-value" class="target-value">0</span>
+            <span class="gradient-label">TARGET WATTS</span>
+          </div>
           <div id="altitude-display" class="altitude-overlay">
             <span id="altitude-value" class="altitude-value">0m</span>
             <span class="altitude-label">ELEVATION</span>
+          </div>
+          <div id="workout-info" class="altitude-overlay hidden">
+            <span id="workout-name-value" class="workout-name-value">—</span>
+            <span id="workout-step-value" class="altitude-label">STEP 1</span>
           </div>
         </div>
 
@@ -122,9 +143,9 @@
           </div>
 
           <div class="metric-card metric-elevation-gain">
-            <div class="metric-label">ELEV. GAIN</div>
+            <div class="metric-label" id="metric-elevation-label">ELEV. GAIN</div>
             <div class="metric-value" id="metric-elevation-gain">0</div>
-            <div class="metric-unit">m</div>
+            <div class="metric-unit" id="metric-elevation-unit">m</div>
           </div>
 
           <div class="metric-card metric-avg-power">
@@ -136,8 +157,8 @@
 
         <!-- Resistance Control -->
         <div class="controls-section">
-          <div class="resistance-control">
-            <label>Manual Resistance</label>
+          <div class="resistance-control" id="resistance-control">
+            <label id="resistance-label">Manual Resistance</label>
             <input type="range" id="resistance-slider" min="0" max="100" value="0" class="slider">
             <span id="resistance-value" class="resistance-display">0%</span>
           </div>
@@ -153,6 +174,7 @@
     <div id="summary-screen" class="screen">
       <div class="summary-container">
         <h1>Ride Complete</h1>
+        <p id="summary-title" class="summary-subtitle">—</p>
         <div class="summary-grid">
           <div class="summary-stat">
             <div class="summary-label">Distance</div>
@@ -192,7 +214,15 @@
           </div>
         </div>
         <canvas id="summary-chart" class="summary-chart"></canvas>
-        <button id="btn-new-ride" class="btn btn-primary btn-lg">New Ride</button>
+        <div class="chart-legend">
+          <span class="legend-item"><i class="swatch swatch-power"></i>Power</span>
+          <span class="legend-item"><i class="swatch swatch-hr"></i>Heart Rate</span>
+          <span class="legend-item" id="legend-elev"><i class="swatch swatch-elev"></i>Elevation</span>
+        </div>
+        <div class="summary-actions">
+          <button id="btn-export-tcx" class="btn btn-accent">Export .TCX (Strava / Garmin)</button>
+          <button id="btn-new-ride" class="btn btn-primary">New Ride</button>
+        </div>
       </div>
     </div>
   </div>

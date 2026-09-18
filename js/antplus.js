@@ -37,8 +37,10 @@ const FEC_PAGE_GENERAL = 0x10;
 const FEC_PAGE_GENERAL_SETTINGS = 0x11;
 const FEC_PAGE_TRAINER_DATA = 0x19;
 const FEC_PAGE_COMMAND_STATUS = 0x47;
-const FEC_PAGE_TRACK_RESISTANCE = 0x30;
+const FEC_PAGE_BASIC_RESISTANCE = 0x30;
+const FEC_PAGE_TARGET_POWER = 0x31;
 const FEC_PAGE_WIND_RESISTANCE = 0x32;
+const FEC_PAGE_TRACK_RESISTANCE = 0x33;
 
 export class AntPlusConnection {
   constructor() {
@@ -54,6 +56,8 @@ export class AntPlusConnection {
     this._latestData = { power: 0, cadence: 0, speed: 0, heartRate: 0 };
     this._lastGradientSent = null;
     this._lastGradientTime = 0;
+    this._lastPowerSent = null;
+    this._lastPowerTime = 0;
     this._fecFound = false;
     this._hrFound = false;
     this._features = { simulationParams: true, resistanceLevel: true };
@@ -369,13 +373,33 @@ export class AntPlusConnection {
     const resistance = Math.round((level / 100) * 200);
 
     const payload = [
-      0x30,
-      0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+      FEC_PAGE_BASIC_RESISTANCE,
+      0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
       resistance & 0xFF,
-      (resistance >> 8) & 0xFF,
     ];
 
     await this._sendAcknowledged(FEC_CHANNEL, payload);
+  }
+
+  async setTargetPower(watts) {
+    if (!this._connected || !this._fecFound) return;
+
+    const target = Math.max(0, Math.round(watts));
+    const now = Date.now();
+    if (this._lastPowerSent === target && now - this._lastPowerTime < 1000) return;
+
+    const quarterWatts = Math.min(0xFFFF, target * 4);
+
+    const payload = [
+      FEC_PAGE_TARGET_POWER,
+      0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+      quarterWatts & 0xFF,
+      (quarterWatts >> 8) & 0xFF,
+    ];
+
+    await this._sendAcknowledged(FEC_CHANNEL, payload);
+    this._lastPowerSent = target;
+    this._lastPowerTime = now;
   }
 
   async _sendAcknowledged(channel, payload) {
