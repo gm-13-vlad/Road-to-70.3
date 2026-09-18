@@ -84,7 +84,11 @@
       <div class="ride-layout">
         <!-- Terrain Visualization -->
         <div class="terrain-section">
-          <canvas id="terrain-canvas"></canvas>
+          <canvas id="world-canvas"></canvas>
+          <div class="profile-strip" id="profile-strip">
+            <canvas id="terrain-canvas"></canvas>
+          </div>
+          <button id="btn-view-toggle" class="view-toggle" title="Toggle view">Profile View</button>
           <div id="gradient-display" class="gradient-overlay">
             <span id="gradient-value" class="gradient-value">0%</span>
             <span class="gradient-label">GRADIENT</span>

@@ -4,6 +4,7 @@ A free, open-source virtual cycling trainer that connects to your smart bike tra
 
 ## Features
 
+- **Outdoor Road View** — Ride a 3D road that winds and climbs with your route's real elevation
 - **Bluetooth + ANT+ Support** — Connect via Bluetooth (FTMS) or ANT+ USB dongle (FE-C)
 - **Heart Rate Monitor** — Connect a Bluetooth or ANT+ HR strap
 - **Terrain Simulation** — Routes with hills and descents that automatically adjust trainer resistance
@@ -25,6 +26,23 @@ A free, open-source virtual cycling trainer that connects to your smart bike tra
 | Sprint Intervals | 20 km | Moderate | Punchy 6-8% hills for interval training |
 | Mountain Pass | 30 km | Hard | Sustained 8 km climb at 5.5% average |
 | Half Ironman 70.3 | 90 km | Brutal | Full 70.3 bike leg with mixed terrain |
+
+## The Road View
+
+The main ride screen is a scrolling outdoor road rendered with classic pseudo-3D
+projection — the same technique arcade racers used before real 3D hardware.
+
+- The road's **elevation is your actual route**. On the Mountain Pass climb the road
+  rears up and the horizon closes in; over the top it drops away and the view opens out.
+  Elevation is deliberately exaggerated so gradient is something you *see*, not just read.
+- The road **winds**, with roadside trees, bushes, rocks and kilometre signs going by.
+- **Sky changes with the time of day** you're actually riding — daylight, golden hour,
+  dusk, or a starfield at night.
+- Your rider **pedals in time with your real cadence** and the camera bobs with it.
+
+A slim **elevation profile** sits along the bottom showing where you are in the route
+(or, in a workout, the interval timeline). Hit **Profile View** at any time to swap the
+road for the full-size chart, and **Road View** to go back.
 
 ## Workouts (ERG Mode)
 

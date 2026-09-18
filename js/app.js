@@ -4,6 +4,7 @@ import { routes } from './routes.js';
 import { workouts, workoutDuration, WorkoutPlayer } from './workouts.js';
 import { RouteSimulation } from './simulation.js';
 import { TerrainRenderer } from './terrain.js';
+import { WorldRenderer } from './world.js';
 import { WorkoutRenderer, renderWorkoutMini } from './workoutview.js';
 import { Dashboard } from './dashboard.js';
 import { RideRecorder, loadHistory, saveRide, deleteRide, downloadTCX } from './recorder.js';
@@ -32,7 +33,9 @@ class App {
 
     this._terrain = null;
     this._workoutView = null;
+    this._world = null;
     this._dashboard = null;
+    this._viewMode = 'world';
 
     this._selectedRoute = null;
     this._selectedWorkout = null;
@@ -90,6 +93,7 @@ class App {
     document.getElementById('btn-start-manual').addEventListener('click', () => this._startRide(true));
     document.getElementById('btn-pause').addEventListener('click', () => this._togglePause());
     document.getElementById('btn-end-ride').addEventListener('click', () => this._endRide());
+    document.getElementById('btn-view-toggle').addEventListener('click', () => this._toggleView());
     document.getElementById('btn-new-ride').addEventListener('click', () => this._newRide());
     document.getElementById('btn-export-tcx').addEventListener('click', () => {
       if (this._lastRide) downloadTCX(this._lastRide);
@@ -424,14 +428,20 @@ class App {
     this._showScreen('ride-screen');
     this._configureRideChrome(isWorkout);
 
+    const strip = document.getElementById('terrain-canvas');
+    this._world = new WorldRenderer(document.getElementById('world-canvas'));
+    this._world.bottomInset = document.getElementById('profile-strip').offsetHeight;
+
     if (isWorkout) {
       this._workoutPlayer.load(this._selectedWorkout);
-      this._workoutView = new WorkoutRenderer(document.getElementById('terrain-canvas'));
+      this._workoutView = new WorkoutRenderer(strip, true);
       this._workoutView.setWorkout(this._selectedWorkout, this._ftp);
+      this._world.setRolling();
       this._terrain = null;
     } else {
-      this._terrain = new TerrainRenderer(document.getElementById('terrain-canvas'));
+      this._terrain = new TerrainRenderer(strip, true);
       this._terrain.setRoute(this._selectedRoute);
+      this._world.setRoute(this._selectedRoute);
       this._workoutView = null;
     }
 
@@ -449,6 +459,10 @@ class App {
   _configureRideChrome(isWorkout) {
     const show = (id, visible) =>
       document.getElementById(id).classList.toggle('hidden', !visible);
+
+    this._viewMode = 'world';
+    document.querySelector('.ride-layout').classList.remove('profile-view');
+    document.getElementById('btn-view-toggle').textContent = 'Profile View';
 
     show('gradient-display', !isWorkout);
     show('altitude-display', !isWorkout);
@@ -561,6 +575,24 @@ class App {
     } else {
       this._terrain.render(this._simulation.progress);
     }
+
+    if (this._viewMode === 'world') {
+      this._world.render(this._simulation.currentDistance, speed, cadence, delta);
+    }
+  }
+
+  _toggleView() {
+    this._viewMode = this._viewMode === 'world' ? 'profile' : 'world';
+    const layout = document.querySelector('.ride-layout');
+    layout.classList.toggle('profile-view', this._viewMode === 'profile');
+    document.getElementById('btn-view-toggle').textContent =
+      this._viewMode === 'world' ? 'Profile View' : 'Road View';
+
+    requestAnimationFrame(() => {
+      if (this._terrain) this._terrain.setCompact(this._viewMode === 'world');
+      if (this._workoutView) this._workoutView.setCompact(this._viewMode === 'world');
+      if (this._world) this._world._resize();
+    });
   }
 
   _simulateErgPower(target) {
@@ -614,6 +646,14 @@ class App {
     if (this._workoutView) {
       this._workoutView.destroy();
       this._workoutView = null;
+    }
+    if (this._terrain) {
+      this._terrain.destroy();
+      this._terrain = null;
+    }
+    if (this._world) {
+      this._world.destroy();
+      this._world = null;
     }
 
     const sim = this._simulation;

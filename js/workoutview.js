@@ -1,12 +1,13 @@
 import { getPowerZone } from './utils.js';
 
 export class WorkoutRenderer {
-  constructor(canvas) {
+  constructor(canvas, compact = false) {
     this._canvas = canvas;
     this._ctx = canvas.getContext('2d');
     this._workout = null;
     this._total = 0;
     this._peak = 1.2;
+    this._compact = compact;
     this._dpr = window.devicePixelRatio || 1;
     this._onResize = () => this._resize();
     this._resize();
@@ -15,6 +16,11 @@ export class WorkoutRenderer {
 
   destroy() {
     window.removeEventListener('resize', this._onResize);
+  }
+
+  setCompact(compact) {
+    this._compact = compact;
+    this._resize();
   }
 
   _resize() {
@@ -49,20 +55,24 @@ export class WorkoutRenderer {
 
     ctx.clearRect(0, 0, w, h);
 
-    const bg = ctx.createLinearGradient(0, 0, 0, h);
-    bg.addColorStop(0, '#0c1424');
-    bg.addColorStop(1, '#0a0f1a');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, w, h);
+    if (!this._compact) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#0c1424');
+      bg.addColorStop(1, '#0a0f1a');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+    }
 
     if (!this._workout) return;
 
-    const margin = { top: 34, bottom: 34, left: 0, right: 0 };
+    const margin = this._compact
+      ? { top: 8, bottom: 10, left: 0, right: 0 }
+      : { top: 34, bottom: 34, left: 0, right: 0 };
     const plotH = h - margin.top - margin.bottom;
     const toX = (t) => (t / this._total) * w;
     const toY = (pct) => margin.top + plotH - (pct / this._peak) * plotH;
 
-    this._drawFtpLine(ctx, w, toY);
+    if (!this._compact) this._drawFtpLine(ctx, w, toY);
 
     let acc = 0;
     for (const iv of this._workout.intervals) {
@@ -109,7 +119,7 @@ export class WorkoutRenderer {
 
     this._drawProgressVeil(ctx, toX(elapsed), h, margin);
     this._drawPlayhead(ctx, toX(elapsed), h, margin);
-    this._drawTimeAxis(ctx, w, h, margin, toX);
+    if (!this._compact) this._drawTimeAxis(ctx, w, h, margin, toX);
   }
 
   _drawFtpLine(ctx, w, toY) {

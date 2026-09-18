@@ -1,13 +1,30 @@
 export class TerrainRenderer {
-  constructor(canvas) {
+  constructor(canvas, compact = false) {
     this._canvas = canvas;
     this._ctx = canvas.getContext('2d');
     this._route = null;
     this._progress = 0;
     this._currentElevation = 0;
+    this._compact = compact;
     this._dpr = window.devicePixelRatio || 1;
+    this._onResize = () => this._resize();
     this._resize();
-    window.addEventListener('resize', () => this._resize());
+    window.addEventListener('resize', this._onResize);
+  }
+
+  destroy() {
+    window.removeEventListener('resize', this._onResize);
+  }
+
+  get _margin() {
+    return this._compact
+      ? { top: 10, bottom: 16 }
+      : { top: 40, bottom: 50 };
+  }
+
+  setCompact(compact) {
+    this._compact = compact;
+    this._resize();
   }
 
   _resize() {
@@ -54,13 +71,13 @@ export class TerrainRenderer {
 
     ctx.clearRect(0, 0, w, h);
 
-    this._drawSky(ctx, w, h);
+    if (!this._compact) this._drawSky(ctx, w, h);
 
     if (!this._route) return;
 
     this._drawElevationProfile(ctx, w, h, progress);
     this._drawRiderMarker(ctx, w, h, progress);
-    this._drawDistanceMarkers(ctx, w, h);
+    if (!this._compact) this._drawDistanceMarkers(ctx, w, h);
   }
 
   _drawSky(ctx, w, h) {
@@ -88,7 +105,7 @@ export class TerrainRenderer {
     const points = this._route.points;
     const totalDist = this._route.totalDistance;
     const elevRange = this._maxElev - this._minElev;
-    const margin = { top: 40, bottom: 50, left: 0, right: 0 };
+    const margin = { ...this._margin, left: 0, right: 0 };
     const plotW = w - margin.left - margin.right;
     const plotH = h - margin.top - margin.bottom;
 
@@ -110,10 +127,11 @@ export class TerrainRenderer {
     ctx.lineTo(margin.left, h - margin.bottom);
     ctx.closePath();
 
+    const c = this._compact;
     const completedGrad = ctx.createLinearGradient(0, margin.top, 0, h - margin.bottom);
-    completedGrad.addColorStop(0, 'rgba(255, 107, 53, 0.5)');
-    completedGrad.addColorStop(0.5, 'rgba(255, 107, 53, 0.2)');
-    completedGrad.addColorStop(1, 'rgba(255, 107, 53, 0.05)');
+    completedGrad.addColorStop(0, c ? 'rgba(255, 107, 53, 0.85)' : 'rgba(255, 107, 53, 0.5)');
+    completedGrad.addColorStop(0.5, c ? 'rgba(255, 107, 53, 0.45)' : 'rgba(255, 107, 53, 0.2)');
+    completedGrad.addColorStop(1, c ? 'rgba(255, 107, 53, 0.18)' : 'rgba(255, 107, 53, 0.05)');
     ctx.fillStyle = completedGrad;
     ctx.fill();
 
@@ -134,9 +152,9 @@ export class TerrainRenderer {
     ctx.closePath();
 
     const upcomingGrad = ctx.createLinearGradient(0, margin.top, 0, h - margin.bottom);
-    upcomingGrad.addColorStop(0, 'rgba(6, 182, 212, 0.35)');
-    upcomingGrad.addColorStop(0.5, 'rgba(6, 182, 212, 0.12)');
-    upcomingGrad.addColorStop(1, 'rgba(6, 182, 212, 0.03)');
+    upcomingGrad.addColorStop(0, c ? 'rgba(6, 182, 212, 0.7)' : 'rgba(6, 182, 212, 0.35)');
+    upcomingGrad.addColorStop(0.5, c ? 'rgba(6, 182, 212, 0.35)' : 'rgba(6, 182, 212, 0.12)');
+    upcomingGrad.addColorStop(1, c ? 'rgba(6, 182, 212, 0.12)' : 'rgba(6, 182, 212, 0.03)');
     ctx.fillStyle = upcomingGrad;
     ctx.fill();
 
@@ -146,8 +164,8 @@ export class TerrainRenderer {
     for (let i = 1; i < points.length; i++) {
       ctx.lineTo(toX(points[i].distance), toY(points[i].elevation));
     }
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = c ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = c ? 1.5 : 2;
     ctx.stroke();
 
     // Completed portion outline
@@ -167,7 +185,7 @@ export class TerrainRenderer {
   _drawRiderMarker(ctx, w, h, progress) {
     const totalDist = this._route.totalDistance;
     const elevRange = this._maxElev - this._minElev;
-    const margin = { top: 40, bottom: 50 };
+    const margin = this._margin;
     const plotH = h - margin.top - margin.bottom;
 
     const x = (progress * totalDist / totalDist) * w;
@@ -203,7 +221,7 @@ export class TerrainRenderer {
 
   _drawDistanceMarkers(ctx, w, h) {
     const totalDist = this._route.totalDistance;
-    const margin = { bottom: 50 };
+    const margin = this._margin;
     const y = h - margin.bottom + 20;
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';

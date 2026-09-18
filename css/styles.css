@@ -467,7 +467,7 @@ body {
 /* Ride Screen */
 .ride-layout {
   display: grid;
-  grid-template-rows: 35vh 1fr auto;
+  grid-template-rows: 48vh 1fr auto;
   width: 100%;
   height: 100vh;
   gap: 0;
@@ -480,11 +480,67 @@ body {
   overflow: hidden;
 }
 
+#world-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.profile-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 68px;
+  background: rgba(8, 12, 20, 0.88);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 #terrain-canvas {
   width: 100%;
   height: 100%;
   display: block;
 }
+
+/* Profile-only view */
+.ride-layout.profile-view #world-canvas { display: none; }
+
+.ride-layout.profile-view .profile-strip {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  background: var(--bg-secondary);
+  backdrop-filter: none;
+  border-top: none;
+}
+
+.view-toggle {
+  position: absolute;
+  bottom: 78px;
+  right: 16px;
+  z-index: 3;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-toggle:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.ride-layout.profile-view .view-toggle { bottom: 16px; }
 
 .gradient-overlay {
   position: absolute;
