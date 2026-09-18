@@ -154,11 +154,39 @@ Works with any smart trainer that supports the **ANT+ FE-C (Fitness Equipment Co
 The layout adapts to phones in both orientations — the metrics stack two-up in
 portrait and the road view shrinks to keep the controls on screen in landscape.
 
-One caveat: **Web Bluetooth and WebUSB need a secure context**, and `localhost`
-only counts as secure on the machine running the server. To pair a trainer from a
-phone you need to serve the app over real HTTPS (or use the phone itself to run
-it, which isn't practical). Without HTTPS the phone can still run **Manual Mode**,
-browse routes and workouts, and review history.
+The app is an installable **PWA**: add it to your home screen and it launches
+full-screen with its own icon, no browser chrome, and **works with no network**
+(a service worker caches everything on first load).
+
+### Putting it on your phone, free
+
+Any static host with HTTPS works. The simplest is **GitHub Pages**, since the
+repo is already on GitHub:
+
+1. Push this branch
+2. Repo **Settings → Pages**
+3. Source: **Deploy from a branch**, pick the branch and **/ (root)**
+4. Open the published `https://<user>.github.io/<repo>/` on your phone
+5. **Share → Add to Home Screen**
+
+HTTPS matters for more than tidiness: browsers only expose Bluetooth and USB in
+a *secure context*. `localhost` counts as secure on the machine serving it, but
+that exemption does not extend to other devices, so a phone loading
+`http://192.168.x.x:8000` gets no Bluetooth at all.
+
+### Pairing a trainer from a phone
+
+| Platform | Trainer pairing |
+|----------|-----------------|
+| Android (Chrome) | Works over HTTPS |
+| iOS (Safari or any iOS browser) | **Not supported** — iOS ships no Web Bluetooth |
+| iOS with [Bluefy](https://apps.apple.com/us/app/bluefy-web-ble-browser/id1492822055) | Works — a free browser that implements Web Bluetooth |
+| Any native build (Capacitor) | Works — uses native Bluetooth, no HTTPS needed |
+
+Without pairing, a phone can still run **Manual Mode**, browse routes and
+workouts, and review and export history.
+
+ANT+ needs a USB dongle, so it stays a desktop feature.
 
 ## Browser Requirements
 

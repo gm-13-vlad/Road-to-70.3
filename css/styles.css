@@ -43,8 +43,26 @@ body {
   color: var(--text-primary);
   overflow: hidden;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
 }
+
+/* Installed to a home screen the page runs full-bleed under the notch and the
+   home indicator, so anything at an edge needs the safe-area inset. */
+.controls-section {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+.connect-container,
+.summary-container {
+  padding-top: calc(32px + env(safe-area-inset-top));
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+}
+
+.gradient-overlay { top: calc(16px + env(safe-area-inset-top)); right: calc(16px + env(safe-area-inset-right)); }
+.altitude-overlay { top: calc(16px + env(safe-area-inset-top)); left: calc(16px + env(safe-area-inset-left)); }
 
 /* Screens */
 .screen {
