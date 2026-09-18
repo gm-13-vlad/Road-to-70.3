@@ -62,7 +62,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* `safe` keeps the top reachable when the content is taller than the
+     viewport; plain `center` makes overflow above the start edge unscrollable */
+  justify-content: safe center;
   gap: 28px;
   width: 100%;
   max-width: 700px;
@@ -70,6 +72,7 @@ body {
   padding: 32px 24px;
   overflow-y: auto;
   max-height: 100vh;
+  max-height: 100dvh;
 }
 
 .logo h1 {
@@ -135,6 +138,211 @@ body {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
+
+/* Profiles */
+.profile-section { width: 100%; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.section-head h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.link-btn:hover { text-decoration: underline; }
+
+.profile-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px 8px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+  flex-shrink: 0;
+  text-align: left;
+}
+
+.profile-chip:hover { background: var(--bg-card-hover); }
+
+.profile-chip.active {
+  border-color: var(--accent);
+  background: rgba(255, 107, 53, 0.08);
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.chip-meta { display: flex; flex-direction: column; gap: 1px; }
+
+.chip-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.chip-sub {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.profile-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.profile-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(4, 7, 13, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal.hidden { display: none !important; }
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-card h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.modal-field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+
+.modal-field label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.modal-field input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  width: 100%;
+}
+
+.modal-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.field-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.modal-row { display: flex; gap: 12px; }
+
+.wkg-readout {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--cyan);
+  border: 1px solid var(--border);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal-actions-right { display: flex; gap: 8px; }
 
 /* Mode Tabs */
 .mode-tabs {
@@ -467,10 +675,12 @@ body {
 /* Ride Screen */
 .ride-layout {
   display: grid;
-  grid-template-rows: 48vh 1fr auto;
+  grid-template-rows: 48vh minmax(0, 1fr) auto;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   gap: 0;
+  overflow: hidden;
 }
 
 /* Terrain */
@@ -625,10 +835,11 @@ body {
 .metrics-dashboard {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
   background: var(--bg-primary);
+  min-height: 0;
 }
 
 .metric-card {
@@ -641,6 +852,7 @@ body {
   justify-content: center;
   position: relative;
   overflow: hidden;
+  min-height: 0;
 }
 
 .metric-label {
@@ -653,7 +865,7 @@ body {
 
 .metric-value {
   font-family: var(--font-mono);
-  font-size: 2.4rem;
+  font-size: clamp(1.25rem, 3.2vw + 0.6rem, 2.4rem);
   font-weight: 700;
   line-height: 1.1;
   margin: 4px 0;
@@ -853,31 +1065,78 @@ body {
   justify-content: center;
 }
 
-/* Responsive */
+/* Responsive — phones in portrait */
 @media (max-width: 768px) {
+  .connect-container { padding: 20px 16px; gap: 22px; }
+
+  .logo h1 { font-size: 2rem; letter-spacing: 2px; }
+  .tagline { font-size: 0.8rem; letter-spacing: 2px; }
+
   .metrics-dashboard {
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-rows: repeat(4, minmax(0, 1fr));
   }
 
-  .metric-value {
-    font-size: 1.8rem;
-  }
+  .metric-card { padding: 6px 8px; }
+  .metric-label { font-size: 0.58rem; letter-spacing: 1.2px; }
+  .metric-unit { font-size: 0.6rem; }
 
-  .ride-layout {
-    grid-template-rows: 25vh 1fr auto;
-  }
+  .ride-layout { grid-template-rows: 34vh minmax(0, 1fr) auto; }
 
-  .controls-section {
-    flex-direction: column;
-    gap: 12px;
-  }
+  .profile-strip { height: 48px; }
+  .view-toggle { bottom: 58px; right: 10px; padding: 5px 9px; font-size: 0.62rem; }
 
-  .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .gradient-overlay, .altitude-overlay { padding: 6px 10px; top: 10px; }
+  .gradient-overlay { right: 10px; }
+  .altitude-overlay { left: 10px; }
+  .gradient-value, .target-value { font-size: 1.15rem; }
+  .altitude-value { font-size: 0.95rem; }
+  .workout-name-value { font-size: 0.78rem; max-width: 150px; }
+  .gradient-label, .altitude-label { font-size: 0.5rem; letter-spacing: 1px; }
 
-  .logo h1 {
-    font-size: 2rem;
-  }
+  .controls-section { flex-direction: column; gap: 10px; padding: 10px 14px; }
+  .resistance-control { width: 100%; }
+  .ride-controls { width: 100%; }
+  .ride-controls .btn { flex: 1; }
+
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .summary-stat { padding: 14px 10px; }
+  .summary-value { font-size: 1.15rem; }
+  .summary-container { padding: 24px 16px; gap: 20px; }
+
+  .route-list { grid-template-columns: 1fr; }
+  .tab-btn { font-size: 0.7rem; letter-spacing: 1px; padding: 10px 6px; }
+
+  .history-card { flex-wrap: wrap; gap: 10px; }
+  .history-stats { font-size: 0.72rem; gap: 10px; }
+
+  .modal-row { flex-direction: column; }
+  .modal-card { padding: 20px; gap: 14px; }
+  .modal-actions { flex-direction: column-reverse; align-items: stretch; }
+  .modal-actions-right { justify-content: stretch; }
+  .modal-actions-right .btn { flex: 1; }
+}
+
+/* Phones held in landscape — very little vertical room */
+@media (max-height: 520px) and (orientation: landscape) {
+  .ride-layout { grid-template-rows: 46vh minmax(0, 1fr) auto; }
+
+  .profile-strip { height: 40px; }
+  .view-toggle { bottom: 48px; padding: 4px 8px; font-size: 0.6rem; }
+
+  .metric-card { padding: 4px 6px; }
+  .metric-label { font-size: 0.55rem; letter-spacing: 1px; }
+  .metric-value { font-size: clamp(1rem, 2.4vw + 0.4rem, 1.6rem); margin: 1px 0; }
+  .metric-unit { font-size: 0.55rem; }
+
+  .gradient-overlay, .altitude-overlay { padding: 5px 9px; top: 8px; }
+  .gradient-value, .target-value { font-size: 1.05rem; }
+  .altitude-value { font-size: 0.9rem; }
+
+  .controls-section { flex-direction: row; padding: 6px 12px; gap: 12px; }
+  .ride-controls { width: auto; }
+  .btn { padding: 8px 14px; font-size: 0.78rem; }
+
+  .connect-container { padding: 16px; gap: 16px; }
+  .logo h1 { font-size: 1.5rem; }
 }

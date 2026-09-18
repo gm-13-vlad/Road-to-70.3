@@ -18,6 +18,7 @@ export class RouteSimulation {
     this._cadenceSamples = 0;
     this._totalHR = 0;
     this._hrSamples = 0;
+    this._maxHR = 0;
     this._totalSpeed = 0;
     this._speedSamples = 0;
     this._calories = 0;
@@ -38,6 +39,7 @@ export class RouteSimulation {
   get maxPower() { return this._maxPower; }
   get avgCadence() { return this._cadenceSamples > 0 ? Math.round(this._totalCadence / this._cadenceSamples) : 0; }
   get avgHR() { return this._hrSamples > 0 ? Math.round(this._totalHR / this._hrSamples) : 0; }
+  get maxHR() { return this._maxHR; }
   get avgSpeed() { return this._speedSamples > 0 ? (this._totalSpeed / this._speedSamples).toFixed(1) : '0.0'; }
   get calories() { return Math.round(this._calories); }
 
@@ -62,6 +64,7 @@ export class RouteSimulation {
     this._cadenceSamples = 0;
     this._totalHR = 0;
     this._hrSamples = 0;
+    this._maxHR = 0;
     this._totalSpeed = 0;
     this._speedSamples = 0;
     this._calories = 0;
@@ -125,6 +128,7 @@ export class RouteSimulation {
     if (heartRate > 0) {
       this._totalHR += heartRate;
       this._hrSamples++;
+      if (heartRate > this._maxHR) this._maxHR = heartRate;
     }
 
     if (speedKmh > 0) {

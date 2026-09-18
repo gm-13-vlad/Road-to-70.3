@@ -8,6 +8,10 @@ import { WorldRenderer } from './world.js';
 import { WorkoutRenderer, renderWorkoutMini } from './workoutview.js';
 import { Dashboard } from './dashboard.js';
 import { RideRecorder, loadHistory, saveRide, deleteRide, downloadTCX } from './recorder.js';
+import {
+  listProfiles, getActive, setActive, addProfile, updateProfile,
+  deleteProfile, initials, wattsPerKg,
+} from './profiles.js';
 import { formatTime, formatDistance } from './utils.js';
 
 const FLAT_ROUTE = {
@@ -50,40 +54,20 @@ class App {
     this._paused = false;
     this._lastRide = null;
 
-    this._loadSettings();
-    this._initUI();
+    this._syncProfile();
     this._bindEvents();
+    this._renderProfiles();
     this._renderRouteList();
     this._renderWorkoutList();
     this._renderHistory();
   }
 
-  _loadSettings() {
-    try {
-      this._riderWeight = parseFloat(localStorage.getItem('riderWeight')) || 75;
-      this._bikeWeight = parseFloat(localStorage.getItem('bikeWeight')) || 10;
-      this._ftp = parseInt(localStorage.getItem('ftp')) || 200;
-    } catch {
-      this._riderWeight = 75;
-      this._bikeWeight = 10;
-      this._ftp = 200;
-    }
-  }
-
-  _saveSettings() {
-    try {
-      localStorage.setItem('riderWeight', this._riderWeight);
-      localStorage.setItem('bikeWeight', this._bikeWeight);
-      localStorage.setItem('ftp', this._ftp);
-    } catch {
-      // storage unavailable
-    }
-  }
-
-  _initUI() {
-    document.getElementById('rider-weight').value = this._riderWeight;
-    document.getElementById('bike-weight').value = this._bikeWeight;
-    document.getElementById('ftp-input').value = this._ftp;
+  _syncProfile() {
+    this._profile = getActive();
+    this._ftp = this._profile.ftp;
+    this._riderWeight = this._profile.riderWeight;
+    this._bikeWeight = this._profile.bikeWeight;
+    if (this._dashboard) this._dashboard.ftp = this._ftp;
   }
 
   _bindEvents() {
@@ -107,22 +91,18 @@ class App {
       btn.addEventListener('click', () => this._switchTab(btn.dataset.tab));
     });
 
-    document.getElementById('rider-weight').addEventListener('change', (e) => {
-      this._riderWeight = parseFloat(e.target.value) || 75;
-      this._saveSettings();
+    document.getElementById('btn-edit-profile').addEventListener('click', () => this._openProfileModal('edit'));
+    document.getElementById('pm-cancel').addEventListener('click', () => this._closeProfileModal());
+    document.getElementById('pm-save').addEventListener('click', () => this._saveProfileModal());
+    document.getElementById('pm-delete').addEventListener('click', () => this._deleteFromModal());
+
+    document.getElementById('profile-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'profile-modal') this._closeProfileModal();
     });
 
-    document.getElementById('bike-weight').addEventListener('change', (e) => {
-      this._bikeWeight = parseFloat(e.target.value) || 10;
-      this._saveSettings();
-    });
-
-    document.getElementById('ftp-input').addEventListener('change', (e) => {
-      this._ftp = parseInt(e.target.value) || 200;
-      this._saveSettings();
-      if (this._dashboard) this._dashboard.ftp = this._ftp;
-      this._renderWorkoutList();
-    });
+    for (const id of ['pm-ftp', 'pm-weight']) {
+      document.getElementById(id).addEventListener('input', () => this._updateWkgReadout());
+    }
 
     document.getElementById('resistance-slider').addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
@@ -143,6 +123,114 @@ class App {
     };
     wireTrainer(this._bleTrainer);
     wireTrainer(this._antTrainer);
+  }
+
+  _renderProfiles() {
+    const container = document.getElementById('profile-chips');
+    container.innerHTML = '';
+
+    for (const p of listProfiles()) {
+      const chip = document.createElement('button');
+      chip.className = 'profile-chip' + (p.id === this._profile.id ? ' active' : '');
+
+      const av = document.createElement('span');
+      av.className = 'avatar';
+      av.style.background = p.color;
+      av.textContent = initials(p.name);
+
+      const meta = document.createElement('span');
+      meta.className = 'chip-meta';
+      const name = document.createElement('span');
+      name.className = 'chip-name';
+      name.textContent = p.name;
+      const sub = document.createElement('span');
+      sub.className = 'chip-sub';
+      sub.textContent = `${p.ftp} W · ${wattsPerKg(p).toFixed(2)} W/kg`;
+      meta.append(name, sub);
+
+      chip.append(av, meta);
+      chip.addEventListener('click', () => this._selectProfile(p.id));
+      container.appendChild(chip);
+    }
+
+    const add = document.createElement('button');
+    add.className = 'profile-add';
+    add.id = 'btn-add-profile';
+    add.textContent = '+ Add Rider';
+    add.addEventListener('click', () => this._openProfileModal('add'));
+    container.appendChild(add);
+  }
+
+  _selectProfile(id) {
+    setActive(id);
+    this._syncProfile();
+    this._renderProfiles();
+    this._renderWorkoutList();
+    this._renderHistory();
+  }
+
+  _openProfileModal(mode) {
+    this._modalMode = mode;
+    const p = this._profile;
+    const isEdit = mode === 'edit';
+
+    document.getElementById('pm-title').textContent = isEdit ? 'Edit Rider' : 'Add Rider';
+    document.getElementById('pm-name').value = isEdit ? p.name : '';
+    document.getElementById('pm-ftp').value = isEdit ? p.ftp : 200;
+    document.getElementById('pm-weight').value = isEdit ? p.riderWeight : 75;
+    document.getElementById('pm-bike').value = isEdit ? p.bikeWeight : 10;
+
+    const delBtn = document.getElementById('pm-delete');
+    delBtn.classList.toggle('hidden', !isEdit || listProfiles().length <= 1);
+
+    this._updateWkgReadout();
+    document.getElementById('profile-modal').classList.remove('hidden');
+    document.getElementById('pm-name').focus();
+  }
+
+  _closeProfileModal() {
+    document.getElementById('profile-modal').classList.add('hidden');
+  }
+
+  _updateWkgReadout() {
+    const ftp = parseFloat(document.getElementById('pm-ftp').value);
+    const kg = parseFloat(document.getElementById('pm-weight').value);
+    const el = document.getElementById('pm-wkg');
+    if (isFinite(ftp) && isFinite(kg) && kg > 0) {
+      el.textContent = `${(ftp / kg).toFixed(2)} W/kg at threshold`;
+    } else {
+      el.textContent = '—';
+    }
+  }
+
+  _saveProfileModal() {
+    const fields = {
+      name: document.getElementById('pm-name').value,
+      ftp: document.getElementById('pm-ftp').value,
+      riderWeight: document.getElementById('pm-weight').value,
+      bikeWeight: document.getElementById('pm-bike').value,
+    };
+
+    if (this._modalMode === 'edit') {
+      updateProfile(this._profile.id, fields);
+    } else {
+      addProfile(fields);
+    }
+
+    this._syncProfile();
+    this._renderProfiles();
+    this._renderWorkoutList();
+    this._renderHistory();
+    this._closeProfileModal();
+  }
+
+  _deleteFromModal() {
+    if (deleteProfile(this._profile.id)) {
+      this._syncProfile();
+      this._renderProfiles();
+      this._renderHistory();
+    }
+    this._closeProfileModal();
   }
 
   _switchTab(tab) {
@@ -244,12 +332,16 @@ class App {
     const container = document.getElementById('history-list');
     if (!container) return;
 
-    const history = loadHistory();
+    // rides recorded before profiles existed have no profileId — show them to
+    // whoever is active rather than hiding them
+    const history = loadHistory()
+      .filter(r => !r.profileId || r.profileId === this._profile.id);
     container.innerHTML = '';
 
     if (history.length === 0) {
       container.innerHTML = `<div class="history-empty">
-        No saved rides yet.<br>Finish a ride and it will be stored here,
+        No saved rides yet for <b>${escapeHtml(this._profile.name)}</b>.<br>
+        Finish a ride and it will be stored here,
         ready to export to Strava or Garmin Connect.
       </div>`;
       return;
@@ -667,6 +759,10 @@ class App {
     const ride = this._recorder.buildRide({
       title,
       mode: this._mode,
+      profileId: this._profile.id,
+      profileName: this._profile.name,
+      ftp: this._ftp,
+      riderWeight: this._riderWeight,
       durationSec: time,
       distanceM: dist,
       avgSpeed: avgSpeed.toFixed(1),
@@ -692,6 +788,12 @@ class App {
     document.getElementById('summary-avg-hr').textContent = sim.avgHR > 0 ? sim.avgHR + ' bpm' : '-- bpm';
     document.getElementById('summary-elevation').textContent = Math.round(sim.elevationGain) + ' m';
     document.getElementById('summary-calories').textContent = sim.calories + ' kcal';
+    document.getElementById('summary-max-hr').textContent = sim.maxHR > 0 ? sim.maxHR + ' bpm' : '-- bpm';
+
+    const wkg = this._riderWeight > 0 ? sim.avgPower / this._riderWeight : 0;
+    document.getElementById('summary-wkg').textContent = wkg.toFixed(2);
+    const intensity = this._ftp > 0 ? Math.round((sim.avgPower / this._ftp) * 100) : 0;
+    document.getElementById('summary-intensity').textContent = intensity + '% FTP';
 
     this._showScreen('summary-screen');
     requestAnimationFrame(() => this._renderSummaryChart());
@@ -831,6 +933,15 @@ class App {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

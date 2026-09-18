@@ -4,6 +4,7 @@ A free, open-source virtual cycling trainer that connects to your smart bike tra
 
 ## Features
 
+- **Multiple Riders** — Each person gets their own FTP and weight; all training scales to them
 - **Outdoor Road View** — Ride a 3D road that winds and climbs with your route's real elevation
 - **Bluetooth + ANT+ Support** — Connect via Bluetooth (FTMS) or ANT+ USB dongle (FE-C)
 - **Heart Rate Monitor** — Connect a Bluetooth or ANT+ HR strap
@@ -26,6 +27,22 @@ A free, open-source virtual cycling trainer that connects to your smart bike tra
 | Sprint Intervals | 20 km | Moderate | Punchy 6-8% hills for interval training |
 | Mountain Pass | 30 km | Hard | Sustained 8 km climb at 5.5% average |
 | Half Ironman 70.3 | 90 km | Brutal | Full 70.3 bike leg with mixed terrain |
+
+## Riders
+
+More than one person can train on the same trainer and browser. Each rider is a
+profile holding their **FTP**, **body weight** and **bike weight**, and everything
+that should be personal scales from it:
+
+- **Workout targets** — the same Sweet Spot session prescribes 239 W to a rider with
+  a 265 W FTP and 162 W to one at 180 W. Nobody rides someone else's numbers.
+- **Power zones** — the colour of the power readout is relative to that rider's FTP.
+- **W/kg** — shown on the rider chip and in every ride summary.
+- **Ride history** — each rider sees only their own rides, and exported .TCX files
+  carry their name.
+
+Add riders with **+ Add Rider**, switch by tapping a chip, and change numbers with
+**Edit**. Retest your FTP and just update it — future workouts follow immediately.
 
 ## The Road View
 
@@ -100,7 +117,7 @@ Web Bluetooth requires a secure context (HTTPS or localhost). Any static file se
 
 ## Usage
 
-1. **Set your profile** — Enter rider weight, bike weight, and FTP
+1. **Set up your rider** — Add a rider with your FTP, body weight and bike weight
 2. **Pick a session** — Choose a **Route** (terrain simulation) or a **Workout** (ERG target power)
 3. **Choose protocol** — Toggle between Bluetooth and ANT+ at the top of the connection section
 4. **Connect your trainer** — Click "Connect Trainer" and select your device (Bluetooth pairing dialog or ANT+ USB dongle)
@@ -131,6 +148,17 @@ Works with any smart trainer that supports the **ANT+ FE-C (Fitness Equipment Co
 - All trainers listed above also support ANT+ FE-C
 - Older trainers that only have ANT+ (no Bluetooth)
 - ANT+ heart rate straps (automatically detected on the same dongle)
+
+## On Your Phone
+
+The layout adapts to phones in both orientations — the metrics stack two-up in
+portrait and the road view shrinks to keep the controls on screen in landscape.
+
+One caveat: **Web Bluetooth and WebUSB need a secure context**, and `localhost`
+only counts as secure on the machine running the server. To pair a trainer from a
+phone you need to serve the app over real HTTPS (or use the phone itself to run
+it, which isn't practical). Without HTTPS the phone can still run **Manual Mode**,
+browse routes and workouts, and review history.
 
 ## Browser Requirements
 

@@ -19,19 +19,12 @@
           <p class="tagline">Virtual Cycling Trainer</p>
         </div>
 
-        <div class="settings-panel">
-          <div class="setting-group">
-            <label for="rider-weight">Rider Weight (kg)</label>
-            <input type="number" id="rider-weight" value="75" min="30" max="200" step="0.5">
+        <div class="profile-section">
+          <div class="section-head">
+            <h2>Rider</h2>
+            <button id="btn-edit-profile" class="link-btn">Edit</button>
           </div>
-          <div class="setting-group">
-            <label for="bike-weight">Bike Weight (kg)</label>
-            <input type="number" id="bike-weight" value="10" min="5" max="25" step="0.5">
-          </div>
-          <div class="setting-group">
-            <label for="ftp-input">FTP (watts)</label>
-            <input type="number" id="ftp-input" value="200" min="50" max="500" step="5">
-          </div>
+          <div id="profile-chips" class="profile-chips"></div>
         </div>
 
         <div class="mode-tabs">
@@ -216,6 +209,18 @@
             <div class="summary-label">Calories</div>
             <div class="summary-value" id="summary-calories">0 kcal</div>
           </div>
+          <div class="summary-stat">
+            <div class="summary-label">Avg W/kg</div>
+            <div class="summary-value" id="summary-wkg">0.00</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Intensity</div>
+            <div class="summary-value" id="summary-intensity">0% FTP</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Max Heart Rate</div>
+            <div class="summary-value" id="summary-max-hr">-- bpm</div>
+          </div>
         </div>
         <canvas id="summary-chart" class="summary-chart"></canvas>
         <div class="chart-legend">
@@ -226,6 +231,40 @@
         <div class="summary-actions">
           <button id="btn-export-tcx" class="btn btn-accent">Export .TCX (Strava / Garmin)</button>
           <button id="btn-new-ride" class="btn btn-primary">New Ride</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Editor -->
+    <div id="profile-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 id="pm-title">Add Rider</h3>
+        <div class="modal-field">
+          <label for="pm-name">Name</label>
+          <input type="text" id="pm-name" maxlength="24" placeholder="e.g. Gabriel" autocomplete="off">
+        </div>
+        <div class="modal-field">
+          <label for="pm-ftp">FTP (watts)</label>
+          <input type="number" id="pm-ftp" min="50" max="600" step="5" value="200">
+          <span class="field-hint">Your 1-hour max power. Workout targets and power zones scale from this.</span>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label for="pm-weight">Rider weight (kg)</label>
+            <input type="number" id="pm-weight" min="30" max="200" step="0.5" value="75">
+          </div>
+          <div class="modal-field">
+            <label for="pm-bike">Bike weight (kg)</label>
+            <input type="number" id="pm-bike" min="3" max="30" step="0.5" value="10">
+          </div>
+        </div>
+        <div id="pm-wkg" class="wkg-readout">—</div>
+        <div class="modal-actions">
+          <button id="pm-delete" class="btn btn-danger btn-sm">Delete Rider</button>
+          <div class="modal-actions-right">
+            <button id="pm-cancel" class="btn btn-secondary btn-sm">Cancel</button>
+            <button id="pm-save" class="btn btn-accent btn-sm">Save</button>
+          </div>
         </div>
       </div>
     </div>

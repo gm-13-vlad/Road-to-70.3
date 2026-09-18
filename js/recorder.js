@@ -166,7 +166,7 @@ ${trackpoints}
           </LX>
         </Extensions>
       </Lap>
-      <Notes>${escapeXml(ride.title || 'Road to 70.3')}</Notes>
+      <Notes>${escapeXml(ride.profileName ? `${ride.title} — ${ride.profileName}` : (ride.title || 'Road to 70.3'))}</Notes>
       <Creator xsi:type="Device_t">
         <Name>Road to 70.3</Name>
         <UnitId>0</UnitId>
