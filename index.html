@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Road to 70.3 — Virtual Cycling Trainer</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" onerror="">
+</head>
+<body>
+  <div id="app">
+    <!-- Connection Screen -->
+    <div id="connect-screen" class="screen active">
+      <div class="connect-container">
+        <div class="logo">
+          <h1>ROAD TO <span class="accent">70.3</span></h1>
+          <p class="tagline">Virtual Cycling Trainer</p>
+        </div>
+
+        <div class="settings-panel">
+          <div class="setting-group">
+            <label for="rider-weight">Rider Weight (kg)</label>
+            <input type="number" id="rider-weight" value="75" min="30" max="200" step="0.5">
+          </div>
+          <div class="setting-group">
+            <label for="bike-weight">Bike Weight (kg)</label>
+            <input type="number" id="bike-weight" value="10" min="5" max="25" step="0.5">
+          </div>
+          <div class="setting-group">
+            <label for="ftp-input">FTP (watts)</label>
+            <input type="number" id="ftp-input" value="200" min="50" max="500" step="5">
+          </div>
+        </div>
+
+        <div class="route-selector">
+          <h2>Select Route</h2>
+          <div id="route-list" class="route-list"></div>
+        </div>
+
+        <div class="connect-actions">
+          <button id="btn-connect-trainer" class="btn btn-primary btn-lg">
+            <span class="btn-icon">&#9889;</span>
+            Connect Trainer (Bluetooth)
+          </button>
+          <button id="btn-connect-hr" class="btn btn-secondary">
+            <span class="btn-icon">&#9829;</span>
+            Connect Heart Rate Monitor
+          </button>
+          <div id="connection-status" class="connection-status">
+            <span id="trainer-status" class="status-item">Trainer: <span class="status-disconnected">Not Connected</span></span>
+            <span id="hr-status" class="status-item">HR: <span class="status-disconnected">Not Connected</span></span>
+          </div>
+          <button id="btn-start-ride" class="btn btn-accent btn-lg" disabled>
+            Start Ride
+          </button>
+          <button id="btn-start-manual" class="btn btn-secondary btn-sm">
+            Start Without Trainer (Manual Mode)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ride Screen -->
+    <div id="ride-screen" class="screen">
+      <div class="ride-layout">
+        <!-- Terrain Visualization -->
+        <div class="terrain-section">
+          <canvas id="terrain-canvas"></canvas>
+          <div id="gradient-display" class="gradient-overlay">
+            <span id="gradient-value" class="gradient-value">0%</span>
+            <span class="gradient-label">GRADIENT</span>
+          </div>
+          <div id="altitude-display" class="altitude-overlay">
+            <span id="altitude-value" class="altitude-value">0m</span>
+            <span class="altitude-label">ELEVATION</span>
+          </div>
+        </div>
+
+        <!-- Main Metrics Dashboard -->
+        <div class="metrics-dashboard">
+          <div class="metric-card metric-power">
+            <div class="metric-label">POWER</div>
+            <div class="metric-value" id="metric-power">0</div>
+            <div class="metric-unit">watts</div>
+            <div class="power-zone-bar" id="power-zone-bar"></div>
+          </div>
+
+          <div class="metric-card metric-speed">
+            <div class="metric-label">SPEED</div>
+            <div class="metric-value" id="metric-speed">0.0</div>
+            <div class="metric-unit">km/h</div>
+          </div>
+
+          <div class="metric-card metric-cadence">
+            <div class="metric-label">CADENCE</div>
+            <div class="metric-value" id="metric-cadence">0</div>
+            <div class="metric-unit">rpm</div>
+          </div>
+
+          <div class="metric-card metric-hr">
+            <div class="metric-label">HEART RATE</div>
+            <div class="metric-value" id="metric-hr">--</div>
+            <div class="metric-unit">bpm</div>
+          </div>
+
+          <div class="metric-card metric-distance">
+            <div class="metric-label">DISTANCE</div>
+            <div class="metric-value" id="metric-distance">0.00</div>
+            <div class="metric-unit">km</div>
+          </div>
+
+          <div class="metric-card metric-elapsed">
+            <div class="metric-label">TIME</div>
+            <div class="metric-value" id="metric-elapsed">00:00</div>
+            <div class="metric-unit">&nbsp;</div>
+          </div>
+
+          <div class="metric-card metric-elevation-gain">
+            <div class="metric-label">ELEV. GAIN</div>
+            <div class="metric-value" id="metric-elevation-gain">0</div>
+            <div class="metric-unit">m</div>
+          </div>
+
+          <div class="metric-card metric-avg-power">
+            <div class="metric-label">AVG POWER</div>
+            <div class="metric-value" id="metric-avg-power">0</div>
+            <div class="metric-unit">watts</div>
+          </div>
+        </div>
+
+        <!-- Resistance Control -->
+        <div class="controls-section">
+          <div class="resistance-control">
+            <label>Manual Resistance</label>
+            <input type="range" id="resistance-slider" min="0" max="100" value="0" class="slider">
+            <span id="resistance-value" class="resistance-display">0%</span>
+          </div>
+          <div class="ride-controls">
+            <button id="btn-pause" class="btn btn-secondary">Pause</button>
+            <button id="btn-end-ride" class="btn btn-danger">End Ride</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Screen -->
+    <div id="summary-screen" class="screen">
+      <div class="summary-container">
+        <h1>Ride Complete</h1>
+        <div class="summary-grid">
+          <div class="summary-stat">
+            <div class="summary-label">Distance</div>
+            <div class="summary-value" id="summary-distance">0.00 km</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Duration</div>
+            <div class="summary-value" id="summary-duration">00:00:00</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Avg Speed</div>
+            <div class="summary-value" id="summary-avg-speed">0.0 km/h</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Avg Power</div>
+            <div class="summary-value" id="summary-avg-power">0 W</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Max Power</div>
+            <div class="summary-value" id="summary-max-power">0 W</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Avg Cadence</div>
+            <div class="summary-value" id="summary-avg-cadence">0 rpm</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Avg Heart Rate</div>
+            <div class="summary-value" id="summary-avg-hr">-- bpm</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Elevation Gain</div>
+            <div class="summary-value" id="summary-elevation">0 m</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-label">Calories</div>
+            <div class="summary-value" id="summary-calories">0 kcal</div>
+          </div>
+        </div>
+        <canvas id="summary-chart" class="summary-chart"></canvas>
+        <button id="btn-new-ride" class="btn btn-primary btn-lg">New Ride</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
