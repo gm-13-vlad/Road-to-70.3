@@ -1,4 +1,4 @@
-import { TrainerConnection } from './bluetooth.js';
+import { TrainerConnection, isIOS } from './bluetooth.js';
 import { AntPlusConnection } from './antplus.js';
 import { routes } from './routes.js';
 import { workouts, workoutDuration, WorkoutPlayer } from './workouts.js';
@@ -56,6 +56,7 @@ class App {
 
     this._syncProfile();
     this._bindEvents();
+    this._showPlatformHints();
     this._renderProfiles();
     this._renderRouteList();
     this._renderWorkoutList();
@@ -123,6 +124,17 @@ class App {
     };
     wireTrainer(this._bleTrainer);
     wireTrainer(this._antTrainer);
+  }
+
+  // Bluefy supplies navigator.bluetooth, so the hint disappears exactly where
+  // pairing actually works.
+  _showPlatformHints() {
+    const stranded = isIOS() && !navigator.bluetooth;
+    document.getElementById('ios-hint').classList.toggle('hidden', !stranded);
+    if (stranded) {
+      document.getElementById('btn-connect-trainer').disabled = true;
+      document.getElementById('btn-connect-hr').disabled = true;
+    }
   }
 
   _renderProfiles() {

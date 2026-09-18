@@ -686,6 +686,24 @@ body {
   color: var(--text-secondary);
 }
 
+.ios-hint {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  max-width: 520px;
+}
+
+.ios-hint strong { color: var(--text-primary); }
+
+.ios-hint a {
+  color: var(--blue);
+  font-weight: 600;
+}
+
 .status-disconnected { color: var(--text-muted); }
 .status-connecting { color: var(--yellow); }
 .status-connected { color: var(--green); font-weight: 600; }

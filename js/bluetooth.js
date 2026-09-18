@@ -5,6 +5,24 @@ const FTMS_CONTROL_POINT = 0x2AD9;
 const FTMS_FEATURE = 0x2ACC;
 const HR_MEASUREMENT = 0x2A37;
 
+export function isIOS() {
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) ||
+    // iPadOS reports itself as a Mac, so check for a touchscreen too
+    (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+// Why Bluetooth is unavailable, phrased for the device actually in hand.
+export function bluetoothUnavailableReason() {
+  if (isIOS()) {
+    return 'iOS has no Web Bluetooth in any browser. Open this page in the free Bluefy app to pair.';
+  }
+  if (!window.isSecureContext) {
+    return 'Bluetooth needs a secure page. Open this site over HTTPS (or localhost).';
+  }
+  return 'This browser has no Web Bluetooth. Use Chrome or Edge.';
+}
+
 export class TrainerConnection {
   constructor() {
     this._device = null;
@@ -37,7 +55,7 @@ export class TrainerConnection {
 
   async connectTrainer() {
     if (!navigator.bluetooth) {
-      this._emitStatus('error', 'Web Bluetooth not supported. Use Chrome/Edge on HTTPS or localhost.');
+      this._emitStatus('error', bluetoothUnavailableReason());
       return false;
     }
 
@@ -86,7 +104,7 @@ export class TrainerConnection {
 
   async connectHRMonitor() {
     if (!navigator.bluetooth) {
-      this._emitStatus('error', 'Web Bluetooth not supported.');
+      this._emitStatus('error', bluetoothUnavailableReason());
       return false;
     }
 
