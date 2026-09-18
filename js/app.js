@@ -1,4 +1,5 @@
 import { TrainerConnection } from './bluetooth.js';
+import { AntPlusConnection } from './antplus.js';
 import { routes } from './routes.js';
 import { RouteSimulation } from './simulation.js';
 import { TerrainRenderer } from './terrain.js';
@@ -7,7 +8,10 @@ import { formatTime, formatDistance } from './utils.js';
 
 class App {
   constructor() {
-    this._trainer = new TrainerConnection();
+    this._bleTrainer = new TrainerConnection();
+    this._antTrainer = new AntPlusConnection();
+    this._protocol = 'ble';
+    this._trainer = this._bleTrainer;
     this._simulation = new RouteSimulation();
     this._terrain = null;
     this._dashboard = null;
@@ -62,6 +66,10 @@ class App {
     document.getElementById('btn-end-ride').addEventListener('click', () => this._endRide());
     document.getElementById('btn-new-ride').addEventListener('click', () => this._newRide());
 
+    document.querySelectorAll('.btn-toggle').forEach(btn => {
+      btn.addEventListener('click', () => this._switchProtocol(btn.dataset.protocol));
+    });
+
     document.getElementById('rider-weight').addEventListener('change', (e) => {
       this._riderWeight = parseFloat(e.target.value) || 75;
       this._saveSettings();
@@ -86,13 +94,26 @@ class App {
       }
     });
 
-    this._trainer.onData((data) => {
-      this._latestTrainerData = data;
-    });
+    const wireTrainer = (trainer) => {
+      trainer.onData((data) => { this._latestTrainerData = data; });
+      trainer.onStatus((status) => { this._updateConnectionStatus(status); });
+    };
+    wireTrainer(this._bleTrainer);
+    wireTrainer(this._antTrainer);
+  }
 
-    this._trainer.onStatus((status) => {
-      this._updateConnectionStatus(status);
-    });
+  _switchProtocol(protocol) {
+    if (this._trainer.connected) return;
+    this._protocol = protocol;
+    this._trainer = protocol === 'ant' ? this._antTrainer : this._bleTrainer;
+
+    document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-protocol="${protocol}"]`).classList.add('active');
+
+    const label = document.getElementById('connect-trainer-label');
+    label.textContent = protocol === 'ant'
+      ? 'Connect Trainer (ANT+ USB)'
+      : 'Connect Trainer (Bluetooth)';
   }
 
   _renderRouteList() {
@@ -192,14 +213,22 @@ class App {
   async _connectTrainer() {
     const btn = document.getElementById('btn-connect-trainer');
     btn.disabled = true;
-    btn.textContent = 'Connecting...';
+    const label = document.getElementById('connect-trainer-label');
+    label.textContent = 'Connecting...';
 
     const ok = await this._trainer.connectTrainer();
 
     btn.disabled = false;
-    btn.textContent = ok
-      ? `Connected: ${this._trainer._device?.name || 'Trainer'}`
-      : 'Connect Trainer (Bluetooth)';
+    if (ok) {
+      const name = this._protocol === 'ble'
+        ? (this._bleTrainer._device?.name || 'Trainer')
+        : 'ANT+ Trainer';
+      label.textContent = `Connected: ${name}`;
+    } else {
+      label.textContent = this._protocol === 'ant'
+        ? 'Connect Trainer (ANT+ USB)'
+        : 'Connect Trainer (Bluetooth)';
+    }
   }
 
   async _connectHR() {

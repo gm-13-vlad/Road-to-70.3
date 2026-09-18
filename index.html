@@ -40,9 +40,13 @@
         </div>
 
         <div class="connect-actions">
+          <div class="protocol-toggle">
+            <button id="btn-protocol-ble" class="btn btn-toggle active" data-protocol="ble">Bluetooth</button>
+            <button id="btn-protocol-ant" class="btn btn-toggle" data-protocol="ant">ANT+</button>
+          </div>
           <button id="btn-connect-trainer" class="btn btn-primary btn-lg">
             <span class="btn-icon">&#9889;</span>
-            Connect Trainer (Bluetooth)
+            <span id="connect-trainer-label">Connect Trainer (Bluetooth)</span>
           </button>
           <button id="btn-connect-hr" class="btn btn-secondary">
             <span class="btn-icon">&#9829;</span>
